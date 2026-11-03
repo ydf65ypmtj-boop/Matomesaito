@@ -1,0 +1,641 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>まとめサイト</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=IBM+Plex+Mono:wght@500;600&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #f4f6f7;
+        --surface: #ffffff;
+        --surface-2: #eceff1;
+        --ink: #191d21;
+        --ink-2: #4c565e;
+        --ink-3: #7d8891;
+        --line: #dde3e7;
+        --chip-bg: #ffffff;
+        --chip-ink: #39434b;
+        --chip-on-bg: #191d21;
+        --chip-on-ink: #ffffff;
+        --shadow: 0 1px 2px rgba(20, 28, 34, 0.05), 0 10px 28px -18px rgba(20, 28, 34, 0.28);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #101315;
+          --surface: #1a1e21;
+          --surface-2: #24292d;
+          --ink: #eef2f4;
+          --ink-2: #b3bec5;
+          --ink-3: #828f98;
+          --line: #2e353a;
+          --chip-bg: #1a1e21;
+          --chip-ink: #c3ced4;
+          --chip-on-bg: #eef2f4;
+          --chip-on-ink: #14181b;
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 12px 30px -18px rgba(0, 0, 0, 0.7);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { -webkit-text-size-adjust: 100%; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", sans-serif;
+        font-size: 16px;
+        line-height: 1.75;
+      }
+      .wrap { max-width: 1120px; margin: 0 auto; padding: 0 20px; }
+
+      /* ---------- Hero ---------- */
+      .hero { padding: 56px 0 8px; }
+      .hero-top {
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+      }
+      .hero-mark {
+        width: 52px; height: 52px; border-radius: 14px; flex: 0 0 auto;
+        background: var(--ink); color: var(--bg);
+        display: grid; place-items: center;
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; font-size: 24px;
+      }
+      .hero-who { line-height: 1.45; }
+      .hero-who .name {
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800; font-size: 19px;
+      }
+      .hero-who .sub { color: var(--ink-2); font-size: 13.5px; }
+      h1 {
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800;
+        font-size: clamp(34px, 6.4vw, 58px); line-height: 1.22;
+        margin: 30px 0 14px; letter-spacing: 0.01em;
+      }
+      h1 .accent-word { white-space: nowrap; }
+      .hero-lead {
+        color: var(--ink-2); font-size: clamp(15px, 2.4vw, 17.5px);
+        max-width: 40em; margin: 0;
+      }
+      .hero-stats {
+        display: flex; gap: 0; flex-wrap: wrap;
+        margin: 34px 0 6px; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+      }
+      .stat { padding: 16px 30px 16px 0; margin-right: 30px; }
+      .stat:last-child { margin-right: 0; }
+      .stat .num {
+        font-family: "IBM Plex Mono", monospace; font-weight: 600;
+        font-size: 30px; line-height: 1.1; display: block;
+      }
+      .stat .lbl { color: var(--ink-3); font-size: 13px; }
+
+      /* ---------- Filter ---------- */
+      .toolbar {
+        position: sticky; top: 0; z-index: 5;
+        background: color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+        padding: 18px 0 14px; margin-top: 26px;
+      }
+      .filters { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+      .chip {
+        appearance: none; border: 1px solid var(--line); cursor: pointer;
+        background: var(--chip-bg); color: var(--chip-ink);
+        font-family: inherit; font-weight: 700; font-size: 14px;
+        padding: 8px 16px; border-radius: 999px; line-height: 1.4;
+        transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+      }
+      .chip:hover { border-color: var(--ink-3); }
+      .chip[aria-pressed="true"] {
+        background: var(--chip-on-bg); color: var(--chip-on-ink); border-color: var(--chip-on-bg);
+      }
+      .chip:focus-visible { outline: 2px solid #1d9bf0; outline-offset: 2px; }
+      .count-note { color: var(--ink-3); font-size: 13.5px; margin-left: auto; font-family: "IBM Plex Mono", monospace; }
+
+      /* ---------- Sections ---------- */
+      .cat { margin-top: 38px; }
+      .cat[hidden] { display: none; }
+      .cat-head {
+        display: flex; align-items: baseline; gap: 12px;
+        border-bottom: 2px solid var(--ink); padding-bottom: 8px;
+      }
+      .cat-head h2 {
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800;
+        font-size: 23px; line-height: 1.35; margin: 0;
+      }
+      .cat-head .cat-count {
+        font-family: "IBM Plex Mono", monospace; font-size: 13px; font-weight: 600; color: var(--ink-3);
+      }
+
+      /* ---------- Cards ---------- */
+      .grid {
+        display: grid; gap: 18px; padding: 20px 0 4px;
+        grid-template-columns: 1fr;
+      }
+      @media (min-width: 640px) { .grid { grid-template-columns: 1fr 1fr; } }
+      @media (min-width: 1020px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+      .card {
+        background: var(--surface); border: 1px solid var(--line);
+        border-radius: 18px; padding: 22px 22px 18px;
+        box-shadow: var(--shadow);
+        display: flex; flex-direction: column; gap: 0;
+      }
+      .card[hidden] { display: none; }
+      .card-head { display: flex; align-items: flex-start; gap: 14px; }
+      .tile {
+        width: 56px; height: 56px; border-radius: 15px; flex: 0 0 auto;
+        display: grid; place-items: center; color: #fff;
+        background: var(--tile, #333);
+      }
+      .tile svg { width: 30px; height: 30px; }
+      .card-no {
+        margin-left: auto; font-family: "IBM Plex Mono", monospace;
+        font-size: 12.5px; font-weight: 600; color: var(--ink-3);
+      }
+      .card h3 {
+        font-family: "M PLUS Rounded 1c", sans-serif; font-weight: 800;
+        font-size: 20px; line-height: 1.4; margin: 16px 0 2px;
+      }
+      .card .catch { font-weight: 700; font-size: 14.5px; color: var(--tile-ink, var(--ink-2)); margin: 0 0 8px; }
+      .card .desc { color: var(--ink-2); font-size: 14.5px; line-height: 1.8; margin: 0; }
+      .feats { list-style: none; margin: 14px 0 0; padding: 14px 0 0; border-top: 1px dashed var(--line); }
+      .feats li {
+        position: relative; padding-left: 20px; font-size: 13.5px; color: var(--ink-2);
+        line-height: 1.65; margin-bottom: 5px;
+      }
+      .feats li:last-child { margin-bottom: 0; }
+      .feats li::before {
+        content: ""; position: absolute; left: 2px; top: 0.62em;
+        width: 7px; height: 7px; border-radius: 2px; background: var(--tile, #333);
+      }
+      .api-note {
+        display: flex; align-items: center; gap: 8px;
+        margin-top: 14px; padding: 9px 12px; border-radius: 10px;
+        background: var(--surface-2); color: var(--ink-2);
+        font-size: 13px; font-weight: 700; line-height: 1.5;
+      }
+      .api-note svg { width: 16px; height: 16px; flex: 0 0 auto; }
+      .tags { display: flex; flex-wrap: wrap; gap: 6px; margin-top: auto; padding-top: 16px; }
+      .tag {
+        font-family: "IBM Plex Mono", monospace; font-size: 11.5px; font-weight: 500;
+        background: var(--surface-2); color: var(--ink-2);
+        padding: 4px 9px; border-radius: 6px; line-height: 1.5;
+      }
+      .tag.live { background: #e5f4e8; color: #177245; }
+      @media (prefers-color-scheme: dark) {
+        .tag.live { background: #173526; color: #7fd6a4; }
+      }
+      .open {
+        display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+        margin-top: 16px; padding: 11px 16px; border-radius: 12px;
+        background: var(--tile, #333); color: #fff;
+        font-family: inherit; font-weight: 700; font-size: 15px; line-height: 1.4;
+        text-decoration: none;
+        transition: filter 0.15s ease;
+      }
+      .open:hover { filter: brightness(1.1); }
+      .open:focus-visible { outline: 2px solid #1d9bf0; outline-offset: 2px; }
+      .open svg { width: 17px; height: 17px; }
+      .empty-note {
+        display: none; text-align: center; color: var(--ink-3);
+        padding: 44px 0 30px; font-size: 15px;
+      }
+      .empty-note.show { display: block; }
+
+      /* ---------- Footer ---------- */
+      footer { margin-top: 42px; border-top: 1px solid var(--line); padding: 26px 0 46px; }
+      .foot-row { display: flex; flex-wrap: wrap; gap: 10px 34px; color: var(--ink-2); font-size: 14px; }
+      .foot-row b { color: var(--ink); font-family: "M PLUS Rounded 1c", sans-serif; }
+      .foot-note { color: var(--ink-3); font-size: 13px; margin-top: 12px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        * { transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Hero -->
+      <header class="hero">
+        <div class="hero-top">
+          <div class="hero-mark" aria-hidden="true">佑</div>
+          <div class="hero-who">
+            <div class="name">佑眞</div>
+            <div class="sub">iPadで開発しています</div>
+          </div>
+        </div>
+        <h1>ぼくが作った<br /><span class="accent-word">ソフト</span>まとめ</h1>
+        <p class="hero-lead">
+          自分で作ったソフトやゲームを集めたページです。野球のスコアボードやゲーム、AI、英語クイズ、タイピング練習までいろいろ。気になるカードのボタンを押すと、そのソフトが開きます。
+        </p>
+        <div class="hero-stats" role="list" aria-label="まとめ">
+          <div class="stat" role="listitem"><span class="num">18</span><span class="lbl">収録ソフト</span></div>
+          <div class="stat" role="listitem"><span class="num">9</span><span class="lbl">カテゴリ</span></div>
+          <div class="stat" role="listitem"><span class="num">164</span><span class="lbl">イオンモールAIの収録施設</span></div>
+        </div>
+      </header>
+
+      <!-- Filter -->
+      <div class="toolbar">
+        <div class="filters" role="group" aria-label="カテゴリで絞り込み">
+          <button class="chip" type="button" data-filter="all" aria-pressed="true">すべて</button>
+          <button class="chip" type="button" data-filter="baseball-soft" aria-pressed="false">野球ソフト</button>
+          <button class="chip" type="button" data-filter="baseball-game" aria-pressed="false">野球ゲーム</button>
+          <button class="chip" type="button" data-filter="sports" aria-pressed="false">スポーツ</button>
+          <button class="chip" type="button" data-filter="social" aria-pressed="false">社会科</button>
+          <button class="chip" type="button" data-filter="typing" aria-pressed="false">タイピング</button>
+          <button class="chip" type="button" data-filter="amusement" aria-pressed="false">アミューズメント</button>
+          <button class="chip" type="button" data-filter="ai" aria-pressed="false">人工知能</button>
+          <button class="chip" type="button" data-filter="english" aria-pressed="false">英語</button>
+          <button class="chip" type="button" data-filter="sns" aria-pressed="false">SNS</button>
+          <span class="count-note" id="countNote">18 / 18 件</span>
+        </div>
+      </div>
+
+      <main id="main">
+        <!-- 野球関係ソフト -->
+        <section class="cat" data-cat="baseball-soft">
+          <div class="cat-head"><h2>野球関係ソフト</h2><span class="cat-count">2本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="baseball-soft" style="--tile:#386641; --tile-ink:#2c5233">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="2"/><path d="M3 9.5h18M3 14.5h18M9 4.5v15M15 4.5v15"/></svg>
+                </div>
+                <span class="card-no">No.01</span>
+              </div>
+              <h3>野球スコアボード（得点カウントなし）</h3>
+              <p class="catch">シンプルに試合を表示するスコアボード</p>
+              <p class="desc">野球の試合表示用スコアボード。得点カウント機能なしのシンプル版。</p>
+              <div class="tags"><span class="tag">野球</span><span class="tag">スコアボード</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a12931-c814-7aa6-b3d6-82758d574360" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="baseball-soft" style="--tile:#bc4749; --tile-ink:#9c383a">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M2.5 20h19"/></svg>
+                </div>
+                <span class="card-no">No.02</span>
+              </div>
+              <h3>野手成績のみ（得点カウントあり）</h3>
+              <p class="catch">野手の成績を記録するスコアボード</p>
+              <p class="desc">野手の成績だけに絞った記録用ソフト。こちらの版は得点カウントつき。</p>
+              <div class="tags"><span class="tag">野球</span><span class="tag">成績記録</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a134c4-da5e-73ce-9d1b-b2b058463901" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- 野球関係ゲーム -->
+        <section class="cat" data-cat="baseball-game">
+          <div class="cat-head"><h2>野球関係ゲーム</h2><span class="cat-count">3本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="baseball-game" style="--tile:#e4572e; --tile-ink:#c7431f">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M5.6 5.6c2.6 1.7 2.6 11.1 0 12.8"/><path d="M18.4 5.6c-2.6 1.7-2.6 11.1 0 12.8"/></svg>
+                </div>
+                <span class="card-no">No.03</span>
+              </div>
+              <h3>野球ゲーム</h3>
+              <p class="catch">ブラウザで遊べる野球ゲーム</p>
+              <p class="desc">CodePenでそのまま遊べる野球ゲーム。</p>
+              <div class="tags"><span class="tag">野球</span><span class="tag">ゲーム</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a15d10-134c-741a-ae96-c2434451edf6" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="baseball-game" style="--tile:#1f6f8b; --tile-ink:#185a72">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="7" y="3.5" width="10" height="13" rx="1.5"/><circle cx="12" cy="18.6" r="2.4"/></svg>
+                </div>
+                <span class="card-no">No.04</span>
+              </div>
+              <h3>ストライク＆ボール判定ゲーム</h3>
+              <p class="catch">ストライクかボールかを見分ける</p>
+              <p class="desc">投げられた球がストライクゾーンに入ったかどうかを判定するゲーム。審判の目を試せる。</p>
+              <div class="tags"><span class="tag">野球</span><span class="tag">判定ゲーム</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a15cf7-f901-7eee-b452-f750c3876595" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="baseball-game" style="--tile:#5f6caf; --tile-ink:#4b5890">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M9.4 9.2A2.7 2.7 0 1 1 12 12.4c-.8.25-1 .8-1 1.6"/><path d="M11 17.4h.01"/></svg>
+                </div>
+                <span class="card-no">No.05</span>
+              </div>
+              <h3>球種判定クイズゲーム</h3>
+              <p class="catch">球種を見分けるクイズ</p>
+              <p class="desc">投球の球種を当てるクイズゲーム。変化球の見分けに挑戦できる。</p>
+              <div class="tags"><span class="tag">野球</span><span class="tag">クイズ</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a15db6-1829-7953-b3fe-53fbc463bf71" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- その他スポーツ関係 -->
+        <section class="cat" data-cat="sports">
+          <div class="cat-head"><h2>その他スポーツ関係</h2><span class="cat-count">1本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="sports" style="--tile:#3d9970; --tile-ink:#2e7d5b">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.6"/><circle cx="12" cy="12" r="4.6"/><circle cx="12" cy="12" r="1" fill="currentColor" stroke="none"/><path d="M12 3.4v3M12 17.6v3M3.4 12h3M17.6 12h3"/></svg>
+                </div>
+                <span class="card-no">No.06</span>
+              </div>
+              <h3>卓球ラリー計測</h3>
+              <p class="catch">カメラがラリー回数を数えてくれる</p>
+              <p class="desc">カメラでピンポン球を追いかけて、ラリーが何回続いたかを自動でカウントするアプリ。今のラリー数と最高記録が画面に出るから、記録更新に挑戦できる。</p>
+              <ul class="feats">
+                <li>カメラでボールを自動追跡</li>
+                <li>現在のラリー数をリアルタイム表示</li>
+                <li>最高記録を表示</li>
+              </ul>
+              <div class="tags"><span class="tag">卓球</span><span class="tag">カメラ追跡</span><span class="tag">自動カウント</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a1900a-b095-7ec6-a883-a588f1bf0e83" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+        <!-- 社会科関係 -->
+        <section class="cat" data-cat="social">
+          <div class="cat-head"><h2>社会科関係</h2><span class="cat-count">2本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="social" style="--tile:#c96a17; --tile-ink:#a5560f">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4 3.5 6v14L9 18l6 2 5.5-2V4L15 6 9 4Z"/><path d="M9 4v14M15 6v14"/></svg>
+                </div>
+                <span class="card-no">No.07</span>
+              </div>
+              <h3>都道府県当てクイズ</h3>
+              <p class="catch">都道府県を当てる社会科クイズ</p>
+              <p class="desc">日本の都道府県を当てるクイズ。社会科の勉強に使える。</p>
+              <div class="tags"><span class="tag">社会科</span><span class="tag">クイズ</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a15db2-614c-7889-af03-d8d5cedde09e" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="social" style="--tile:#2f6fb2; --tile-ink:#265d96">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M2.8 12h18.4"/><path d="M12 2.8c2.5 2.6 3.8 5.7 3.8 9.2s-1.3 6.6-3.8 9.2c-2.5-2.6-3.8-5.7-3.8-9.2S9.5 5.4 12 2.8Z"/></svg>
+                </div>
+                <span class="card-no">No.08</span>
+              </div>
+              <h3>地球儀</h3>
+              <p class="catch">カメラに浮かぶAR地球儀</p>
+              <p class="desc">ARで地球儀を表示するWeb作品。CodePenでそのまま開けるよう、index.html／style.css／script.js の3ファイル形式で作ってある。</p>
+              <ul class="feats">
+                <li>ブラウザで動くAR表示</li>
+                <li>CodePen用3ファイル形式で公開</li>
+              </ul>
+              <div class="tags"><span class="tag">社会科</span><span class="tag">AR</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a18be8-5d9a-72f6-a742-b33640a50055" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- タイピング -->
+        <section class="cat" data-cat="typing">
+          <div class="cat-head"><h2>タイピング</h2><span class="cat-count">1本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="typing" style="--tile:#546e7a; --tile-ink:#435a64">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="12" rx="2"/><path d="M6 10h.01M10 10h.01M14 10h.01M18 10h.01M6 14h.01M18 14h.01M9.5 14h5"/></svg>
+                </div>
+                <span class="card-no">No.09</span>
+              </div>
+              <h3>中学校用語タイピング練習</h3>
+              <p class="catch">中学校の用語でタイピング練習</p>
+              <p class="desc">中学校で習う用語を題材にしたタイピング練習。打ちながら用語も覚えられる。</p>
+              <div class="tags"><span class="tag">タイピング</span><span class="tag">中学校</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a161d1-b87e-75b6-89e1-367505ef4755" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- アミューズメント -->
+        <section class="cat" data-cat="amusement">
+          <div class="cat-head"><h2>アミューズメント</h2><span class="cat-count">1本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="amusement" style="--tile:#ef6351; --tile-ink:#cf4a38">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8v5"/><path d="M12 7.8c-2.8 0-4.5 1.6-4.5 4"/><path d="M7.5 11.8 5 15.5a2.3 2.3 0 0 0 3.6 2.7"/><path d="M12 7.8c2.8 0 4.5 1.6 4.5 4"/><path d="M16.5 11.8 19 15.5a2.3 2.3 0 0 1-3.6 2.7"/><path d="M12 7.8v6"/></svg>
+                </div>
+                <span class="card-no">No.10</span>
+              </div>
+              <h3>クレーンゲーム（確率機）</h3>
+              <p class="catch">確率機タイプのクレーンゲーム</p>
+              <p class="desc">確率機仕様のクレーンゲーム。</p>
+              <ul class="feats">
+                <li>ロゴマークを5回タップすると設定を変更できます</li>
+              </ul>
+              <div class="tags"><span class="tag">ゲーム</span><span class="tag">確率機</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a1671f-b4cc-7ab7-b828-d2c7933be851" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+        <!-- 人工知能関係 -->
+        <section class="cat" data-cat="ai">
+          <div class="cat-head"><h2>人工知能関係</h2><span class="cat-count">3本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="ai" style="--tile:#e8862e; --tile-ink:#c96a17">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="4.5" y="8" width="15" height="11" rx="3"/><path d="M12 8V4.5"/><circle cx="12" cy="3.4" r="1.1" fill="currentColor" stroke="none"/><path d="M9 13.2h.01M15 13.2h.01"/><path d="M9.3 16.2c.8.7 1.7 1 2.7 1s1.9-.3 2.7-1"/></svg>
+                </div>
+                <span class="card-no">No.11</span>
+              </div>
+              <h3>AIくん（子供向け）</h3>
+              <p class="catch">子供向けのAI</p>
+              <p class="desc">子供向けに作ったAIチャット。</p>
+              <p class="api-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 20 3.5"/><path d="M15.5 8l3 3"/></svg>APIキーとはこのソフトを利用するために使うものです。必ず入力してください。</p>
+              <div class="tags"><span class="tag">AI</span><span class="tag">子供向け</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a17556-d20b-7a03-8210-6519b51258be" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="ai" style="--tile:#5b7da3; --tile-ink:#49698c">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.6 8l4.5 1.6-4.5 1.6L12 15.7l-1.6-4.5L5.9 9.6 10.4 8Z"/><path d="M18.6 15.4l.8 2 2 .8-2 .8-.8 2-.8-2-2-.8 2-.8Z"/></svg>
+                </div>
+                <span class="card-no">No.12</span>
+              </div>
+              <h3>AI</h3>
+              <p class="catch">AIチャット</p>
+              <p class="desc">AIと会話できるチャットソフト。</p>
+              <p class="api-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 20 3.5"/><path d="M15.5 8l3 3"/></svg>APIキーとはこのソフトを利用するために使うものです。必ず入力してください。</p>
+              <div class="tags"><span class="tag">AI</span><span class="tag">チャット</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a1774d-5c30-7304-b69d-9e7d70f9fb8d" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="ai" style="--tile:#d6336c; --tile-ink:#c2255c">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5 4.6 4h14.8L21 9.5"/><path d="M4 9.5h16V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M9.5 21v-6h5v6"/><path d="M3 9.5a2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 2-2.4"/></svg>
+                </div>
+                <span class="card-no">No.13</span>
+              </div>
+              <h3>イオンモールAI</h3>
+              <p class="catch">イオンのことに何でも答えるAI</p>
+              <p class="desc">イオングループに詳しいルールベースのAI。APIキーなしでそのまま使える。全国164施設ぶんの詳細データを持っていて、主要テナントやシネコンの有無、アクセスまで教えてくれる。</p>
+              <ul class="feats">
+                <li>164施設の詳細データ（テナント・シネコン・アクセス）</li>
+                <li>「社長は誰？」など経営陣の質問にも回答</li>
+                <li>ルールベースなのでキー不要・すぐ動く</li>
+              </ul>
+              <div class="tags"><span class="tag">ルールベースAI</span><span class="tag">キー不要</span><span class="tag">164施設</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a190c2-4eae-756a-9bd0-6a035eed4a4e" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- 英語関係 -->
+        <section class="cat" data-cat="english">
+          <div class="cat-head"><h2>英語関係</h2><span class="cat-count">4本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="english" style="--tile:#0e9594; --tile-ink:#0b7a79">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                </div>
+                <span class="card-no">No.14</span>
+              </div>
+              <h3>AI英会話</h3>
+              <p class="catch">ビデオ通話みたいに話せる英会話</p>
+              <p class="desc">画面の真ん中にAlexが大きく出てきて、話しかけてくれるビデオ通話風の英会話アプリ。英語のすぐ下に日本語訳が出て、Alexが話し終わると自動でマイクがオンになるから、会話が止まらない。</p>
+              <ul class="feats">
+                <li>Alexが喋るアニメーション＋英語・日本語字幕</li>
+                <li>話し終わると自動でマイクON（初期設定）</li>
+                <li>ビデオ通話と回答欄だけの全画面表示</li>
+              </ul>
+              <p class="api-note"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="15.5" r="4.5"/><path d="M11.2 12.3 20 3.5"/><path d="M15.5 8l3 3"/></svg>APIキーとはこのソフトを利用するために使うものです。必ず入力してください。</p>
+              <div class="tags"><span class="tag">英会話</span><span class="tag">音声認識</span><span class="tag">ビデオ通話風</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a17d47-63ac-7935-a357-675810099a15" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="english" style="--tile:#4f772d; --tile-ink:#3f6123">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.3 4.8 7.8 4.2 4.5 4.5v14c3.3-.3 5.8.3 7.5 2 1.7-1.7 4.2-2.3 7.5-2v-14c-3.3-.3-5.8.3-7.5 2Z"/><path d="M12 6.5v14"/></svg>
+                </div>
+                <span class="card-no">No.15</span>
+              </div>
+              <h3>英単語クイズ 一年</h3>
+              <p class="catch">中学1年の英単語クイズ</p>
+              <p class="desc">中学1年で習う英単語のクイズ。</p>
+              <div class="tags"><span class="tag">英語</span><span class="tag">単語クイズ</span><span class="tag">中1</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a184ff-1618-7734-b934-2ff9a11b3b29" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="english" style="--tile:#bc6c25; --tile-ink:#9c581c">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.3 4.8 7.8 4.2 4.5 4.5v14c3.3-.3 5.8.3 7.5 2 1.7-1.7 4.2-2.3 7.5-2v-14c-3.3-.3-5.8.3-7.5 2Z"/><path d="M12 6.5v14"/></svg>
+                </div>
+                <span class="card-no">No.16</span>
+              </div>
+              <h3>英単語クイズ 2年</h3>
+              <p class="catch">中学2年の英単語クイズ</p>
+              <p class="desc">中学2年で習う英単語のクイズ。</p>
+              <div class="tags"><span class="tag">英語</span><span class="tag">単語クイズ</span><span class="tag">中2</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a184ff-941c-7a81-94f6-e1cb6a340ec7" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+
+            <article class="card" data-cat="english" style="--tile:#577590; --tile-ink:#46617a">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.5C10.3 4.8 7.8 4.2 4.5 4.5v14c3.3-.3 5.8.3 7.5 2 1.7-1.7 4.2-2.3 7.5-2v-14c-3.3-.3-5.8.3-7.5 2Z"/><path d="M12 6.5v14"/></svg>
+                </div>
+                <span class="card-no">No.17</span>
+              </div>
+              <h3>英単語クイズ</h3>
+              <p class="catch">英単語のクイズ</p>
+              <p class="desc">英単語のクイズ。</p>
+              <div class="tags"><span class="tag">英語</span><span class="tag">単語クイズ</span><span class="tag">CodePen</span></div>
+              <a class="open" href="https://codepen.io/editor/mdgtlmce-the-solid/pen/01a18500-4092-7a98-960c-1301556a2031" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+
+        <!-- SNS -->
+        <section class="cat" data-cat="sns">
+          <div class="cat-head"><h2>SNS</h2><span class="cat-count">1本</span></div>
+          <div class="grid">
+            <article class="card" data-cat="sns" style="--tile:#1d9bf0; --tile-ink:#0f7cc4">
+              <div class="card-head">
+                <div class="tile" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </div>
+                <span class="card-no">No.18</span>
+              </div>
+              <h3>K（子供用SNS）</h3>
+              <p class="catch">投稿するとAIファンが返事をくれるSNS</p>
+              <p class="desc">みんなで使える子供向けSNS。投稿するとAIファンが内容に合ったコメントを返してくれて、開いている間は閲覧数やコメントがどんどん増えていく。Supabaseにつながっていて、別の端末同士でも投稿を共有できる公開版。</p>
+              <ul class="feats">
+                <li>AIファンの自動返信・コメント</li>
+                <li>公式アカウント（お店風プロフィール）と審査</li>
+                <li>フォロー機能とフォロー中だけの表示</li>
+                <li>子供に適さない言葉は自動でブロック</li>
+                <li>メール確認つきのログイン</li>
+              </ul>
+              <div class="tags"><span class="tag live">公開中</span><span class="tag">Supabase</span><span class="tag">AIファン</span><span class="tag">ログイン制</span></div>
+              <a class="open" href="https://ydf65ypmtj-boop.github.io/K/" target="_blank" rel="noopener">開く<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"/><path d="M8 7h9v9"/></svg></a>
+            </article>
+          </div>
+        </section>
+      </main>
+      <p class="empty-note" id="emptyNote">このカテゴリのソフトはまだありません。</p>
+
+      <!-- Footer -->
+      <footer>
+        <div class="foot-row">
+          <span><b>作っている人：</b>佑眞</span>
+          <span><b>開発環境：</b>iPad</span>
+          <span><b>公開中のソフト：</b>K（子供用SNS）</span>
+        </div>
+        <p class="foot-note">新しいソフトを作ったら、ここに追加していきます。</p>
+      </footer>
+    </div>
+
+    <script>
+      (function () {
+        var chips = Array.prototype.slice.call(document.querySelectorAll(".chip"));
+        var cards = Array.prototype.slice.call(document.querySelectorAll(".card"));
+        var sections = Array.prototype.slice.call(document.querySelectorAll(".cat"));
+        var note = document.getElementById("countNote");
+        var empty = document.getElementById("emptyNote");
+        var total = cards.length;
+
+        function apply(filter) {
+          var shown = 0;
+          cards.forEach(function (card) {
+            var match = filter === "all" || card.getAttribute("data-cat") === filter;
+            card.hidden = !match;
+            if (match) shown++;
+          });
+          sections.forEach(function (sec) {
+            sec.hidden = filter !== "all" && sec.getAttribute("data-cat") !== filter;
+          });
+          note.textContent = shown + " / " + total + " 件";
+          empty.classList.toggle("show", shown === 0);
+        }
+
+        chips.forEach(function (chip) {
+          chip.addEventListener("click", function () {
+            chips.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+            chip.setAttribute("aria-pressed", "true");
+            apply(chip.getAttribute("data-filter"));
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>
